@@ -28,6 +28,43 @@ type PdfInfo struct {
 	Metadata				 Metadata
 }
 
+func (pdf *PdfInfo) getTitle() string{
+	if pdf.Info.Title != "" {
+		return pdf.Info.Title
+	}
+	return pdf.Metadata.RdfMeta.Title
+}
+
+func getAuthor(pdf *PdfInfo) string {
+	if pdf.Info.Author != "" {
+		return pdf.Info.Author
+	}
+	return pdf.Metadata.RdfMeta.Creator
+}
+
+func getCreator(pdf *PdfInfo) string {
+	if pdf.Info.Creator != "" {
+		return pdf.Info.Creator
+	}
+	return ""
+}
+
+func getISBN(pdf *PdfInfo) string {
+	return pdf.Metadata.RdfMeta.Isbn
+}
+
+func getPublisher(pdf *PdfInfo) []string {
+	return pdf.Metadata.RdfMeta.Publishers
+}
+
+func getLanguages(pdf *PdfInfo) []string {
+	return pdf.Metadata.RdfMeta.Languages
+}
+
+func getDescription(pdf *PdfInfo) string {
+	return pdf.Metadata.RdfMeta.Description
+}
+
 type TrailerSection struct {
 	IdRaw string
 	Info  ObjectIdentifier
