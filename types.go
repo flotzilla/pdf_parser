@@ -43,26 +43,26 @@ func (pdf *PdfInfo) getAuthor() string {
 	return pdf.Metadata.RdfMeta.Creator
 }
 
-func getCreator(pdf *PdfInfo) string {
+func (pdf *PdfInfo) getCreator() string {
 	if pdf.Info.Creator != "" {
 		return pdf.Info.Creator
 	}
 	return ""
 }
 
-func getISBN(pdf *PdfInfo) string {
+func (pdf *PdfInfo) getISBN() string {
 	return pdf.Metadata.RdfMeta.Isbn
 }
 
-func getPublisher(pdf *PdfInfo) []string {
+func (pdf *PdfInfo) getPublisher() []string {
 	return pdf.Metadata.RdfMeta.Publishers
 }
 
-func getLanguages(pdf *PdfInfo) []string {
+func (pdf *PdfInfo) getLanguages() []string {
 	return pdf.Metadata.RdfMeta.Languages
 }
 
-func getDescription(pdf *PdfInfo) string {
+func (pdf *PdfInfo) getDescription() string {
 	return pdf.Metadata.RdfMeta.Description
 }
 
