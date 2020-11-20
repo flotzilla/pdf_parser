@@ -29,40 +29,40 @@ type PdfInfo struct {
 	PagesCount               int
 }
 
-func (pdf *PdfInfo) getTitle() string {
+func (pdf *PdfInfo) GetTitle() string {
 	if pdf.Info.Title != "" {
 		return pdf.Info.Title
 	}
 	return pdf.Metadata.RdfMeta.Title
 }
 
-func (pdf *PdfInfo) getAuthor() string {
+func (pdf *PdfInfo) GetAuthor() string {
 	if pdf.Info.Author != "" {
 		return pdf.Info.Author
 	}
 	return pdf.Metadata.RdfMeta.Creator
 }
 
-func (pdf *PdfInfo) getCreator() string {
+func (pdf *PdfInfo) GetCreator() string {
 	if pdf.Info.Creator != "" {
 		return pdf.Info.Creator
 	}
 	return ""
 }
 
-func (pdf *PdfInfo) getISBN() string {
+func (pdf *PdfInfo) GetISBN() string {
 	return pdf.Metadata.RdfMeta.Isbn
 }
 
-func (pdf *PdfInfo) getPublisher() []string {
+func (pdf *PdfInfo) GetPublishers() []string {
 	return pdf.Metadata.RdfMeta.Publishers
 }
 
-func (pdf *PdfInfo) getLanguages() []string {
+func (pdf *PdfInfo) GetLanguages() []string {
 	return pdf.Metadata.RdfMeta.Languages
 }
 
-func (pdf *PdfInfo) getDescription() string {
+func (pdf *PdfInfo) GetDescription() string {
 	return pdf.Metadata.RdfMeta.Description
 }
 
