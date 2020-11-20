@@ -21,8 +21,11 @@ func ParsePdf(fileName string) *PdfInfo {
 
 	defer file.Close()
 
-	err = readPdfInfoVersion(file, &pdfInfo)
+	version, err := readPdfInfoVersion(file)
 	checkError(err)
+	pdfInfo.PdfVersion = version
+
+	pdfInfo.PagesCount = countPages(file)
 
 	err = readXrefOffset(file, &pdfInfo)
 	checkError(err)
@@ -719,12 +722,12 @@ func binToHex(bytesRead int, buffer *[]byte) (*[]byte, int) {
 	return &dst, n
 }
 
-func readPdfInfoVersion(file *os.File, pdfInfo *PdfInfo) error {
+func readPdfInfoVersion(file *os.File) (string, error) {
 	buffer := make([]byte, 15)
 
 	_, err := file.Seek(0, 0)
 	if err != nil {
-		return err
+		return "", err
 	}
 	bytesread, err := file.Read(buffer)
 
@@ -732,12 +735,10 @@ func readPdfInfoVersion(file *os.File, pdfInfo *PdfInfo) error {
 	pdfVersion, err := getPdfVersion((*dst)[:n])
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	pdfInfo.PdfVersion = pdfVersion
-
-	return nil
+	return pdfVersion, nil
 }
 
 func getPdfVersion(content []byte) (string, error) {
@@ -869,4 +870,35 @@ func parseObjectIdentifierFromString(str string) (*ObjectIdentifier, error) {
 	}
 
 	return &oi, nil
+}
+
+func countPages(file *os.File) int {
+	buffer := make([]byte, BufferSize300)
+	reg := regexp.MustCompile(`(?m)\/Type( )?\/Page([^s])`)
+	var (
+		offset int64 = 0
+		count  int   = 0
+	)
+
+	for {
+		bytesRead, err := file.ReadAt(buffer, offset)
+		chunk := (buffer)[:bytesRead]
+
+		if err != nil {
+			if err == io.EOF {
+				resp := reg.FindAllSubmatch(chunk, -1)
+				if resp != nil {
+					count += len(resp)
+				}
+				break
+			}
+		}
+
+		resp := reg.FindAllSubmatch(chunk, -1)
+		if resp != nil {
+			count += len(resp)
+		}
+		offset += BufferSize300
+	}
+	return count
 }

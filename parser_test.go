@@ -1,8 +1,11 @@
 package pdf_parser
 
 import (
-	"fmt"
+	//"fmt"
+	"os"
 	"path/filepath"
+
+	//"path/filepath"
 	"regexp"
 	"testing"
 )
@@ -40,10 +43,22 @@ func TestParseBagElementsZero(t *testing.T) {
 }
 
 func TestParsePdf(t *testing.T) {
-	path, err := filepath.Abs("../resources/sample.pdf")
+	path, err := filepath.Abs("./resources/test.pdf")
 	if err != nil {
 		t.Error(err)
 	}
 	file := ParsePdf(path)
-	fmt.Print(file)
+	if file == nil {
+		t.Error("general fail send regards")
+	}
+}
+
+func TestPdfPageCount(t *testing.T) {
+	file, err := os.Open("./resources/sample.pdf")
+	if err != nil {
+		t.Error(err)
+	}
+	if count := countPages(file) != 2; count {
+		t.Error("Wrong page count, should be 2 ")
+	}
 }

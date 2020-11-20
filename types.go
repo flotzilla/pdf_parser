@@ -25,17 +25,18 @@ type PdfInfo struct {
 	XrefTable                []*XrefTable
 	Root                     RootObject
 	Info                     InfoObject
-	Metadata				 Metadata
+	Metadata                 Metadata
+	PagesCount               int
 }
 
-func (pdf *PdfInfo) getTitle() string{
+func (pdf *PdfInfo) getTitle() string {
 	if pdf.Info.Title != "" {
 		return pdf.Info.Title
 	}
 	return pdf.Metadata.RdfMeta.Title
 }
 
-func getAuthor(pdf *PdfInfo) string {
+func (pdf *PdfInfo) getAuthor() string {
 	if pdf.Info.Author != "" {
 		return pdf.Info.Author
 	}
