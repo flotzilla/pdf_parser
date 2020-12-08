@@ -4,3 +4,4 @@ TODO
 * fix xref parsing for xref object type
 * tests
 * update readme
+* add logging
