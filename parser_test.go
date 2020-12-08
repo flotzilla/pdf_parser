@@ -47,7 +47,12 @@ func TestParsePdf(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	file := ParsePdf(path)
+	file, err := ParsePdf(path)
+
+	if err != nil {
+		t.Error(err)
+	}
+
 	if file == nil {
 		t.Error("general fail send regards")
 	}
@@ -69,7 +74,11 @@ func TestParseTestPdfInfo(t *testing.T) {
 		t.Error(err)
 	}
 
-	pdfInf := ParsePdf(file)
+	pdfInf, err := ParsePdf(file)
+	if err != nil {
+		t.Error(err)
+	}
+
 	if pdfInf.PdfVersion != "2.0" {
 		t.Error("Invalid pdf version parsing")
 	}
@@ -127,5 +136,33 @@ func TestParseTestPdfInfo(t *testing.T) {
 		pdfInf.Metadata.Type != "Metadata" ||
 		pdfInf.Metadata.RdfMeta.Creator != testName {
 		t.Error("Invalid metadata section parse")
+	}
+}
+
+func TestGetTitle(t *testing.T) {
+	file, _ := filepath.Abs("./resources/test.pdf")
+	pdf, err := ParsePdf(file)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if pdf.GetTitle() != pdf.Info.Title ||
+		pdf.GetTitle() != pdf.Metadata.RdfMeta.Title {
+		t.Error("Invalid GetTitle behaviour")
+	}
+}
+
+func TestGetAuthor(t *testing.T) {
+	file, _ := filepath.Abs("./resources/test.pdf")
+	pdf, err := ParsePdf(file)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if pdf.GetAuthor() != pdf.Info.Author ||
+		pdf.GetAuthor() != pdf.Metadata.RdfMeta.Creator {
+		t.Error("Invalid getAuthor behaviour")
 	}
 }
