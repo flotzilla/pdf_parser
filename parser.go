@@ -735,13 +735,17 @@ func parseRegex(regexStr string, bytes []byte) [][]int {
 
 func logError(args ...interface{}) {
 	if isLogEnabled {
-		log.Error(args...)
+		for _, n := range args {
+			log.Error(n)
+		}
 	}
 }
 
 func logWarn(args ...interface{}) {
 	if isLogEnabled {
-		log.Warn(args...)
+		for _, n := range args {
+			log.Warn(n)
+		}
 	}
 }
 

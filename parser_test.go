@@ -1,6 +1,7 @@
 package pdf_parser
 
 import (
+	logger "github.com/sirupsen/logrus"
 	//"fmt"
 	"os"
 	"path/filepath"
@@ -164,5 +165,77 @@ func TestGetAuthor(t *testing.T) {
 	if pdf.GetAuthor() != pdf.Info.Author ||
 		pdf.GetAuthor() != pdf.Metadata.RdfMeta.Creator {
 		t.Error("Invalid getAuthor behaviour")
+	}
+}
+
+func TestSetLogger(t *testing.T) {
+	lg := logger.New()
+	lg.SetOutput(os.Stdout)
+	lg.SetReportCaller(true)
+	lg.SetFormatter(&logger.JSONFormatter{})
+
+	SetLogger(lg)
+	file, _ := filepath.Abs("./resources/test.pdf")
+	pdf, err := ParsePdf(file)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if pdf.GetPagesCount() != 1 {
+		t.Error("Invalid amount of pages")
+	}
+}
+
+func TestNonExistedFileWithLof(t *testing.T) {
+	file, _ := filepath.Abs("./resources/test_non_existed.pdf")
+	_, err := ParsePdf(file)
+
+	if err == nil {
+		t.Error(err)
+	}
+}
+
+func TestWriteLogToFile(t *testing.T) {
+	f, err := os.OpenFile("test.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	defer f.Close()
+
+	lg := logger.New()
+	lg.SetOutput(f)
+	lg.SetFormatter(&logger.JSONFormatter{})
+
+	SetLogger(lg)
+	file, _ := filepath.Abs("./resources/test.pdf")
+	pdf, err := ParsePdf(file)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if pdf.GetPagesCount() != 1 {
+		t.Error("Invalid amount of pages")
+	}
+
+	logFile, errF := os.Stat("test.log")
+	if errF != nil {
+		t.Error(errF)
+	}
+
+	if logFile.Size() == 0 {
+		t.Error("File should not be empty")
+	}
+
+	if os.IsNotExist(errF) {
+		t.Error(errF)
+	}
+
+	e := os.Remove("test.log")
+	if e != nil {
+		t.Error(err)
 	}
 }

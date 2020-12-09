@@ -66,6 +66,16 @@ func (pdf *PdfInfo) GetDescription() string {
 	return pdf.Metadata.RdfMeta.Description
 }
 
+func (pdf *PdfInfo) GetPagesCount() int {
+	return pdf.PagesCount
+}
+
+func (pdf *PdfInfo) GetCover(filepath string) bool {
+	//TODO finish this
+	isSuccess := false
+	return isSuccess
+}
+
 type TrailerSection struct {
 	IdRaw string
 	Info  ObjectIdentifier
