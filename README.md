@@ -1,12 +1,9 @@
 Pdf metadata parser
 ====
-Go library for parsing pdf metadata information
-
-### Description
-This library can:
- * parse pdf info from multiple xref tables
- * obtain metadata
- * extract pdf cover (if cover is an image)
+Go library for parsing pdf metadata information 
+ 
+### License
+MIT 
 
 ### Usage
 ```go
