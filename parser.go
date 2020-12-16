@@ -19,11 +19,13 @@ var (
 	isLogEnabled = false
 )
 
+// Set logrus logger to pdf parser instance
 func SetLogger(logrusLogger *logger.Logger) {
 	isLogEnabled = true
 	log = logrusLogger
 }
 
+// Parse pdf file metadata
 func ParsePdf(fileName string) (*PdfInfo, error) {
 	pdfInfo := PdfInfo{}
 
@@ -83,13 +85,9 @@ func parseBlockStream(b []byte) ([]byte, error) {
 	e := bytes.Index(b, []byte("endstream"))
 	if s != -1 && e != -1 {
 		s = s + len("stream")
-		if b[s] == 13 {
+		if b[s] == 13 || b[s] == 10 {
 			s++
 		}
-		if b[s] == 10 {
-			s++
-		}
-
 		return b[s:e], nil
 	}
 	return nil, cannotFindStreamContent
@@ -110,9 +108,7 @@ func getFlatDecodeContent(b []byte) (string, error) {
 	return "", unsupportedParseContent
 }
 
-/**
-Get dcd content (img file mostly)
-*/
+// Get dcd content (img file mostly)
 func getDcdDecodeContent(b []byte) []byte {
 	if bytes.Contains(b, []byte("/Filter [/DCTDecode]")) &&
 		bytes.Contains(b, []byte("/Subtype /Image")) {
@@ -124,9 +120,7 @@ func getDcdDecodeContent(b []byte) []byte {
 	return nil
 }
 
-/**
-absolute filepath should contains file name and extension, e.g. /home/get/some.jpg
-*/
+// absolute filepath should contains file name and extension, e.g. /home/get/some.jpg
 func writeStreamToFile(b *[]byte, path string) int {
 	f, err := os.Create(path)
 	logError(err)
