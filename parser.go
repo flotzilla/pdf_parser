@@ -65,17 +65,32 @@ func ParsePdf(fileName string) (*PdfInfo, error) {
 	pdfInfo.AdditionalTrailerSection = append(pdfInfo.AdditionalTrailerSection, trailerSection)
 
 	readAllXrefSections(file, &pdfInfo, pdfInfo.OriginalTrailerSection.Prev)
-	readAllXrefSections(file, &pdfInfo, trailerSection.Prev)
+
+	if trailerSection != nil {
+		readAllXrefSections(file, &pdfInfo, trailerSection.Prev)
+	}
 
 	root := findRootObject(&pdfInfo, file)
+	if root == nil {
+		err = cannotFindRootObject
+		logError(err)
+		return &pdfInfo, nil
+	}
 	pdfInfo.Root = *root
 
 	info := searchInfoSection(&pdfInfo, file)
+	if info == nil {
+		err = cannotFindInfoObject
+		logError(err)
+		return &pdfInfo, nil
+	}
 	pdfInfo.Info = *info
 
 	meta, err := findMetadataObject(&pdfInfo, file)
 	logError(err)
-	pdfInfo.Metadata = *meta
+	if meta != nil {
+		pdfInfo.Metadata = *meta
+	}
 
 	return &pdfInfo, nil
 }
@@ -154,8 +169,15 @@ func findRootObject(pdfInfo *PdfInfo, file *os.File) *RootObject {
 	for _, el := range pdfInfo.AdditionalTrailerSection {
 		if el.Root.ObjectNumber != 0 {
 			obj, err := readXrefObjectContent(el.Root.ObjectNumber, pdfInfo, file)
-			logError(err)
-			return parseRootObject(parseObjectContent(obj))
+			if err != nil {
+				logError(err)
+			}
+
+			parsedObj, err := parseObjectContent(obj)
+			if err != nil {
+				logError(err)
+			}
+			return parseRootObject(parsedObj)
 		}
 	}
 	return nil
@@ -211,8 +233,15 @@ func searchInfoSection(pdfInfo *PdfInfo, file *os.File) *InfoObject {
 	for _, el := range pdfInfo.AdditionalTrailerSection {
 		if el.Info.ObjectNumber != 0 {
 			obj, err := readXrefObjectContent(el.Info.ObjectNumber, pdfInfo, file)
-			logError(err)
-			return parseInfoObject(parseObjectContent(obj))
+			if err != nil {
+				logError(err)
+			}
+
+			parsedObj, err := parseObjectContent(obj)
+			if err != nil {
+				logError(err)
+			}
+			return parseInfoObject(parsedObj)
 		}
 	}
 	return nil
@@ -240,7 +269,7 @@ func parseInfoObject(objectContent string) *InfoObject {
 }
 
 func findMetadataObject(pdfInfo *PdfInfo, file *os.File) (*Metadata, error) {
-	if pdfInfo.Root.Metadata.ObjectNumber != 0 {
+	if pdfInfo.Root.Metadata != nil && pdfInfo.Root.Metadata.ObjectNumber != 0 {
 		obj, err := readXrefObjectContent(pdfInfo.Root.Metadata.ObjectNumber, pdfInfo, file)
 		logError(err)
 		return parseMetadataContent(obj)
@@ -361,7 +390,12 @@ func parseInfoObjRegex(objectContext *string, regex *regexp.Regexp) string {
 
 func readXrefObjectContent(objectNumber int, pdfInfo *PdfInfo, file *os.File) ([]byte, error) {
 	var offset int64 = 0
+
 	for _, xrefTable := range pdfInfo.XrefTable {
+		if xrefTable == nil {
+			// TODO fix for object xref
+			return nil, invalidXrefTableStructure
+		}
 		if obj, ok := xrefTable.Objects[objectNumber]; ok {
 			offset = int64(obj.ObjectNumber)
 		}
@@ -402,19 +436,19 @@ func readXrefObjectContent(objectNumber int, pdfInfo *PdfInfo, file *os.File) ([
 	return data, nil
 }
 
-func parseObjectContent(block []byte) string {
+func parseObjectContent(block []byte) (string, error) {
 	s := bytes.Index(block, []byte("<<"))
 	e := bytes.LastIndex(block, []byte(">>"))
 
 	s = s + len("<<")
-	if block[s] == 13 {
-		s++
+	if s == -1 || e == -1 {
+		return "", invalidSearchIndex
 	}
-	if block[s] == 10 {
+	if block[s] == 13 || block[s] == 10 {
 		s++
 	}
 
-	return string(block[s:e])
+	return string(block[s:e]), nil
 }
 
 func readAllXrefSections(file *os.File, pdfInfo *PdfInfo, prevOffset int64) {
@@ -424,7 +458,9 @@ func readAllXrefSections(file *os.File, pdfInfo *PdfInfo, prevOffset int64) {
 		pdfInfo.XrefTable = append(pdfInfo.XrefTable, additionalXref)
 		pdfInfo.AdditionalTrailerSection = append(pdfInfo.AdditionalTrailerSection, trailer)
 
-		readAllXrefSections(file, pdfInfo, trailer.Prev)
+		if trailer != nil {
+			readAllXrefSections(file, pdfInfo, trailer.Prev)
+		}
 	}
 }
 
