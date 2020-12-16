@@ -7,7 +7,7 @@ MIT
 
 ### Usage
 ```go
-import "github.com/flotzilla/pdf_parser.pdf"
+import "github.com/flotzilla/pdf_parser"
 
 // parse file
 pdf, errors := pdf_parser.ParsePdf("filepath/file.pdf")
@@ -26,7 +26,7 @@ pdf.GetPagesCount()
 Using with custom `github.com/sirupsen/logrus` logger
 
 ```go
-import "github.com/flotzilla/pdf_parser.pdf"
+import "github.com/flotzilla/pdf_parser"
 
 l := logger.New()
 l.SetOutput(os.Stdout)
