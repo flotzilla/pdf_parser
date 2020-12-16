@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/hex"
-	"fmt"
 	logger "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -525,7 +524,6 @@ func readXrefBlock(file *os.File, xrefOffset int64, trailerRead bool) (error, *X
 				hexBytes, hexBytesWritten := binToHex(bytesRead, &buffer)
 				xrefBlock = append(xrefBlock, (*hexBytes)[:hexBytesWritten])
 
-				fmt.Println("will btr")
 				break
 			}
 			return err, nil, nil
