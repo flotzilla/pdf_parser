@@ -6,15 +6,19 @@ const BufferSize = 50
 const BufferSize300 = 300
 
 var (
-	fileIsNotPdfError       = errors.New("file is not pdf")
-	cannotReadXrefOffset    = errors.New("cannot read OriginalXrefOffset")
-	cannotParseXrefOffset   = errors.New("cannot parse OriginalXrefOffset")
-	cannotParseXrefSection  = errors.New("cannot parse XrefSection")
-	cannotFindObjectById    = errors.New("cannot find object in Xref table")
-	cannotParseTrailer      = errors.New("cannot parse trailer section")
-	cannotParseObject       = errors.New("cannot parse xref Object")
-	unsupportedParseContent = errors.New("unsupported stream decode content")
-	cannotFindStreamContent = errors.New("cannot find stream content")
+	fileIsNotPdfError         = errors.New("file is not pdf")
+	cannotReadXrefOffset      = errors.New("cannot read OriginalXrefOffset")
+	cannotParseXrefOffset     = errors.New("cannot parse OriginalXrefOffset")
+	cannotParseXrefSection    = errors.New("cannot parse XrefSection")
+	cannotFindObjectById      = errors.New("cannot find object in Xref table")
+	cannotFindRootObject      = errors.New("cannot find root object")
+	cannotFindInfoObject      = errors.New("cannot find info object")
+	cannotParseTrailer        = errors.New("cannot parse trailer section")
+	cannotParseObject         = errors.New("cannot parse xref Object")
+	unsupportedParseContent   = errors.New("unsupported stream decode content")
+	cannotFindStreamContent   = errors.New("cannot find stream content")
+	invalidXrefTableStructure = errors.New("invalid Xref table structure")
+	invalidSearchIndex        = errors.New("invalid search index")
 )
 
 type PdfInfo struct {
@@ -33,14 +37,24 @@ func (pdf *PdfInfo) GetTitle() string {
 	if pdf.Info.Title != "" {
 		return pdf.Info.Title
 	}
-	return pdf.Metadata.RdfMeta.Title
+
+	if pdf.Metadata.RdfMeta != nil {
+		return pdf.Metadata.RdfMeta.Title
+	}
+
+	return ""
 }
 
 func (pdf *PdfInfo) GetAuthor() string {
 	if pdf.Info.Author != "" {
 		return pdf.Info.Author
 	}
-	return pdf.Metadata.RdfMeta.Creator
+
+	if pdf.Metadata.RdfMeta != nil {
+		return pdf.Metadata.RdfMeta.Creator
+	}
+
+	return ""
 }
 
 func (pdf *PdfInfo) GetCreator() string {
@@ -51,19 +65,35 @@ func (pdf *PdfInfo) GetCreator() string {
 }
 
 func (pdf *PdfInfo) GetISBN() string {
-	return pdf.Metadata.RdfMeta.Isbn
+	if pdf.Metadata.RdfMeta != nil {
+		return pdf.Metadata.RdfMeta.Isbn
+	}
+
+	return ""
 }
 
 func (pdf *PdfInfo) GetPublishers() []string {
-	return pdf.Metadata.RdfMeta.Publishers
+	if pdf.Metadata.RdfMeta != nil {
+		return pdf.Metadata.RdfMeta.Publishers
+	}
+
+	return []string{}
 }
 
 func (pdf *PdfInfo) GetLanguages() []string {
-	return pdf.Metadata.RdfMeta.Languages
+	if pdf.Metadata.RdfMeta != nil {
+		return pdf.Metadata.RdfMeta.Languages
+	}
+
+	return []string{}
 }
 
 func (pdf *PdfInfo) GetDescription() string {
-	return pdf.Metadata.RdfMeta.Description
+	if pdf.Metadata.RdfMeta != nil {
+		return pdf.Metadata.RdfMeta.Description
+	}
+
+	return ""
 }
 
 func (pdf *PdfInfo) GetPagesCount() int {
