@@ -1,6 +1,9 @@
 package pdf_parser
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 const BufferSize = 50
 const BufferSize300 = 300
@@ -86,6 +89,30 @@ func (pdf *PdfInfo) GetLanguages() []string {
 	}
 
 	return []string{}
+}
+
+func (pdf *PdfInfo) GetLanguage() string {
+	if pdf.Metadata.RdfMeta != nil {
+		return strings.Join(pdf.Metadata.RdfMeta.Languages, ",")
+	}
+
+	return ""
+}
+
+func (pdf *PdfInfo) GetDate() string {
+	if pdf.Metadata.RdfMeta != nil {
+		return pdf.Metadata.RdfMeta.Date
+	}
+
+	return ""
+}
+
+func (pdf *PdfInfo) GetPublisherInfo() string {
+	if pdf.Metadata.RdfMeta != nil {
+		return strings.Join(pdf.Metadata.RdfMeta.Publishers, ",")
+	}
+
+	return ""
 }
 
 func (pdf *PdfInfo) GetDescription() string {
